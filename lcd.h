@@ -20,7 +20,7 @@
  *******************************************************************************/
 
 /* LCD Data bits mode configuration, its value should be 4 or 8*/
-#define LCD_DATA_BITS_MODE 8
+#define LCD_DATA_BITS_MODE 4
 
 #if((LCD_DATA_BITS_MODE != 4) && (LCD_DATA_BITS_MODE != 8))
 
