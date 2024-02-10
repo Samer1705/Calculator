@@ -13,7 +13,6 @@
  *                                Global Variables                             *
  *******************************************************************************/
 
-uint64 g_numsAndSigns[16] = {0}; 			/* Array for All Numbers & Signs in Equation */
 float64 result;								/* The Result of The Equation */
 uint8 g_array[16] = {0}, g_arrayIndex = 0;	/* Array for All Characters Entered */
 boolean g_newCalcFlag = FALSE;				/* Flag That Sets After Every Calculation */
@@ -38,7 +37,6 @@ uint64 numConcat(uint8 array[], uint8 size)
 /* Function That Clears The Array & Screen */
 void clearAll()
 {
-	g_numsAndSigns[16] = 0;
 	g_array[16] = 0;
 	g_arrayIndex = 0;
 	g_newCalcFlag = FALSE;
@@ -61,28 +59,28 @@ void input(uint8 key)
 /*  */
 void calculate()
 {
+	uint64 numsAndSigns[16] = {0}; 			/* Array for All Numbers & Signs in Equation */
 	uint8 i, numsAndSignsIndex = 0, num[16] = {0}, numIndex = 0;
-	for(i = 0; i <= g_arrayIndex; i++)
+	for(i = 0; i < g_arrayIndex; i++)
 	{
 		if(g_array[i] >= 0 && g_array[i] <= 9)
 		{
 			num[numIndex++] = g_array[i];
+			if(i == g_arrayIndex - 1)
+				numsAndSigns[numsAndSignsIndex++] = numConcat(num, numIndex);
 		}
 		else
 		{
-			g_numsAndSigns[numsAndSignsIndex++] = numConcat(num, numIndex);
-			g_numsAndSigns[numsAndSignsIndex++] = g_array[i];
+			numsAndSigns[numsAndSignsIndex++] = numConcat(num, numIndex);
+			numsAndSigns[numsAndSignsIndex++] = g_array[i];
 			numIndex = 0;
 		}
 	}
-	if(numIndex != 0) g_numsAndSigns[numsAndSignsIndex++] = numConcat(num, numIndex);
-	numIndex = 0;
+	LCD_displayStringRowColumn(3, 0, "=");
 	for(i = 0; i < numsAndSignsIndex; i++)
 	{
-		if(g_numsAndSigns[i] == '+') result = g_numsAndSigns[i-1] + g_numsAndSigns[i+1];
+		if(numsAndSigns[i] == '+') result = numsAndSigns[i-1] +numsAndSigns[i+1];
 	}
-	if(numsAndSignsIndex == 1) result = g_numsAndSigns[0];
-	LCD_displayStringRowColumn(3, 0, "=");
 	LCD_intgerToString(result);
 	g_newCalcFlag = TRUE;
 }
