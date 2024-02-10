@@ -21,10 +21,24 @@ boolean g_newCalcFlag = FALSE;				/* Flag That Sets After Every Calculation */
  *                                Function Definitions                         *
  *******************************************************************************/
 
-/* Concatenates Characters To Become a Full Number */
-uint64 numConcat(uint8 array[], uint8 size)
+
+void displayArray(float64 arr[], uint8 size)
 {
-	uint64 num = 0;
+	uint8 i;
+	LCD_displayStringRowColumn(2, 0, "                ");
+	LCD_moveCursor(2, 0);
+	for(i = 0; i < size; i++)
+	{
+		LCD_intgerToString(arr[i]);
+		LCD_displayCharacter(',');
+	}
+	_delay_ms(1500);
+}
+
+/* Concatenates Characters To Become a Full Number */
+float64 numConcat(uint8 array[], uint8 size)
+{
+	float64 num = 0;
 	uint8 i;
 	for (i = 0; i < size; i++)
 	{
@@ -32,6 +46,27 @@ uint64 numConcat(uint8 array[], uint8 size)
 		num += array[i];
 	}
 	return num;
+}
+
+float64 operation(float64 num1, float64 num2, uint8 sign)
+{
+	switch(sign)
+	{
+	case '+':
+		return num1 + num2;
+		break;
+	case '-':
+		return num1 - num2;
+		break;
+	case '*':
+		return num1 * num2;
+		break;
+	case '%':
+		return num1 / num2;
+	default:
+		break;
+	}
+	return 0;
 }
 
 /* Function That Clears The Array & Screen */
@@ -59,7 +94,7 @@ void input(uint8 key)
 /*  */
 void calculate()
 {
-	uint64 numsAndSigns[16] = {0}; 			/* Array for All Numbers & Signs in Equation */
+	float64 numsAndSigns[16] = {0}; 			/* Array for All Numbers & Signs in Equation */
 	uint8 i, numsAndSignsIndex = 0, num[16] = {0}, numIndex = 0;
 	for(i = 0; i < g_arrayIndex; i++)
 	{
@@ -76,11 +111,39 @@ void calculate()
 			numIndex = 0;
 		}
 	}
-	LCD_displayStringRowColumn(3, 0, "=");
+	displayArray(numsAndSigns, numsAndSignsIndex);
 	for(i = 0; i < numsAndSignsIndex; i++)
 	{
-		if(numsAndSigns[i] == '+') result = numsAndSigns[i-1] +numsAndSigns[i+1];
+		if(numsAndSigns[i] == '*' || numsAndSigns[i] == '%')
+		{
+			numsAndSigns[i-1] = operation(numsAndSigns[i-1], numsAndSigns[i+1], numsAndSigns[i]);
+			uint8 j;
+			for(j = i; j < numsAndSignsIndex; j++)
+			{
+				numsAndSigns[j] = numsAndSigns[j+2];
+			}
+			numsAndSignsIndex-=2;
+			i = 0;
+		}
 	}
+	displayArray(numsAndSigns, numsAndSignsIndex);
+	for(i = 0; i < numsAndSignsIndex; i++)
+	{
+		if(numsAndSigns[i] == '+' || numsAndSigns[i] == '-')
+		{
+			numsAndSigns[i-1] = operation(numsAndSigns[i-1], numsAndSigns[i+1], numsAndSigns[i]);
+			uint8 j;
+			for(j = i; j < numsAndSignsIndex; j++)
+			{
+				numsAndSigns[j] = numsAndSigns[j+2];
+			}
+			numsAndSignsIndex-=2;
+			i = 0;
+		}
+	}
+	displayArray(numsAndSigns, numsAndSignsIndex);
+	result = numsAndSigns[0];
+	LCD_displayStringRowColumn(3, 0, "=");
 	LCD_intgerToString(result);
 	g_newCalcFlag = TRUE;
 }
