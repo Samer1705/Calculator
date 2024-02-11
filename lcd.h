@@ -111,4 +111,9 @@ void LCD_intgerToString(int data);
  */
 void LCD_clearScreen(void);
 
+/*
+ * Description :
+ * to display float numbers
+ */
+void LCD_floatToString(double num);
 #endif /* LCD_H_ */

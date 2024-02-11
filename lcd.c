@@ -14,6 +14,7 @@
 #include "common_macros.h" /* For GET_BIT Macro */
 #include "lcd.h"
 #include "atmega32_gpio.h"
+#include <stdlib.h>
 
 /*******************************************************************************
  *                      Functions Definitions                                  *
@@ -217,4 +218,15 @@ void LCD_intgerToString(int data)
 void LCD_clearScreen(void)
 {
 	LCD_sendCommand(LCD_CLEAR_COMMAND); /* Send clear display command */
+}
+
+/*
+ * Description :
+ * to display float numbers
+ */
+void LCD_floatToString(double num){
+	char buffer[20];
+	dtostrf(num,5,3,buffer);
+	LCD_displayString(buffer);
+
 }
