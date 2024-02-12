@@ -13,21 +13,22 @@
  *                                Global Variables                             *
  *******************************************************************************/
 
-uint8 	g_array[16] = {0},		/* Array for All Characters Entered */
-		g_arrayCount = 0;		/* Number of Characters Entered */
-boolean g_newCalcFlag = FALSE;	/* Flag That Sets After Every Calculation */
+uint8 g_array[16] =
+{ 0 }, /* Array for All Characters Entered */
+g_arrayCount = 0; /* Number of Characters Entered */
+boolean g_newCalcFlag = FALSE; /* Flag That Sets After Every Calculation */
 
 /*******************************************************************************
  *                                Function Definitions                         *
  *******************************************************************************/
 
 /* Function Used For Shifting Array (Still in Progress) */
-void shiftArray(float64 *arr[], uint8 currentIndex, uint8 *size, uint8 shift)
+void shiftArray(float64 *arr, uint8 currentIndex, uint8 *size, uint8 shift)
 {
 	uint8 j;
-	for(j = currentIndex; j < *size; j++)
+	for (j = currentIndex; j < *size; j++)
 	{
-		(*arr)[j] = (*arr)[j + shift];
+		arr[j] = arr[j + shift];
 	}
 	*size -= shift;
 }
@@ -38,7 +39,7 @@ void displayArray(float64 arr[], uint8 size)
 	uint8 i;
 	LCD_displayStringRowColumn(2, 0, "                ");
 	LCD_moveCursor(2, 0);
-	for(i = 0; i < size; i++)
+	for (i = 0; i < size; i++)
 	{
 		LCD_floatToString(arr[i]);
 		LCD_displayCharacter(',');
@@ -62,7 +63,7 @@ float64 numConcat(uint8 array[], uint8 size)
 /* Calculates The Operation Given & Returns The Result */
 float64 operation(float64 num1, float64 num2, uint8 sign)
 {
-	switch(sign)
+	switch (sign)
 	{
 	case '+':
 		return num1 + num2;
@@ -91,10 +92,12 @@ void clearAll()
 /* Function that Displays Character on LCD Screen & Pushes It in The Array of Characters */
 void input(uint8 key)
 {
-	if(g_arrayCount < 16)
+	if (g_arrayCount < 16)
 	{
-		if(key >= 0 && key <= 9) LCD_intgerToString(key);
-		else LCD_displayCharacter(key);
+		if (key >= 0 && key <= 9)
+			LCD_intgerToString(key);
+		else
+			LCD_displayCharacter(key);
 		g_array[g_arrayCount++] = key;
 	}
 }
@@ -102,19 +105,21 @@ void input(uint8 key)
 /* Function that Does All the Calculation Process */
 void calculate()
 {
-	float64 numsAndSigns[16] = {0},	/* Array for All Numbers & Signs in Equation */
-			result; 				/* The Result of The Equation */
-	uint8 	numsAndSignsCount = 0,	/* Count for the Numbers & Signs */
-			num[16] = {0},			/* Array for Numbers to be Concatenated  */
-			numCount = 0,			/* Count for Numbers to be Concatenated */
-			i;						/* Index Used in For Loops */
+	float64 numsAndSigns[16] =
+	{ 0 }, /* Array for All Numbers & Signs in Equation */
+	result; /* The Result of The Equation */
+	uint8 numsAndSignsCount = 0, /* Count for the Numbers & Signs */
+	num[16] =
+	{ 0 }, /* Array for Numbers to be Concatenated  */
+	numCount = 0, /* Count for Numbers to be Concatenated */
+	i; /* Index Used in For Loops */
 
-	for(i = 0; i < g_arrayCount; i++)
+	for (i = 0; i < g_arrayCount; i++)
 	{
-		if(g_array[i] >= 0 && g_array[i] <= 9)
+		if (g_array[i] >= 0 && g_array[i] <= 9)
 		{
 			num[numCount++] = g_array[i];
-			if(i == g_arrayCount - 1)
+			if (i == g_arrayCount - 1)
 				numsAndSigns[numsAndSignsCount++] = numConcat(num, numCount);
 		}
 		else
@@ -125,34 +130,25 @@ void calculate()
 		}
 	}
 	/* displayArray(numsAndSigns, numsAndSignsCount); */
-	for(i = 0; i < numsAndSignsCount; i++)
+	for (i = 0; i < numsAndSignsCount; i++)
 	{
-		if(numsAndSigns[i] == '*' || numsAndSigns[i] == '%')
+		if (numsAndSigns[i] == '*' || numsAndSigns[i] == '%')
 		{
-			numsAndSigns[i-1] = operation(numsAndSigns[i-1], numsAndSigns[i+1], numsAndSigns[i]);
-			/* shiftArray(&numsAndSigns, i, &numsAndSignsCount, 2); */
-			uint8 j;
-			for(j = i; j < numsAndSignsCount; j++)
-			{
-				numsAndSigns[j] = numsAndSigns[j + 2];
-			}
-			numsAndSignsCount -= 2;
+			numsAndSigns[i - 1] = operation(numsAndSigns[i - 1],
+					numsAndSigns[i + 1], numsAndSigns[i]);
+			shiftArray(&numsAndSigns, i, &numsAndSignsCount, 2);
+
 			i = 0;
 		}
 	}
 	/* displayArray(numsAndSigns, numsAndSignsCount); */
-	for(i = 0; i < numsAndSignsCount; i++)
+	for (i = 0; i < numsAndSignsCount; i++)
 	{
-		if(numsAndSigns[i] == '+' || numsAndSigns[i] == '-')
+		if (numsAndSigns[i] == '+' || numsAndSigns[i] == '-')
 		{
-			numsAndSigns[i-1] = operation(numsAndSigns[i-1], numsAndSigns[i+1], numsAndSigns[i]);
-			/* shiftArray(&numsAndSigns, i, &numsAndSignsCount, 2); */
-			uint8 j;
-			for(j = i; j < numsAndSignsCount; j++)
-			{
-				numsAndSigns[j] = numsAndSigns[j + 2];
-			}
-			numsAndSignsCount -= 2;
+			numsAndSigns[i - 1] = operation(numsAndSigns[i - 1],
+					numsAndSigns[i + 1], numsAndSigns[i]);
+			shiftArray(&numsAndSigns, i, &numsAndSignsCount, 2);
 			i = 0;
 		}
 	}
@@ -173,14 +169,15 @@ int main(void)
 	LCD_init();
 	LCD_displayString("CALCULATOR:");
 	LCD_moveCursor(1, 0);
-	while(1)
+	while (1)
 	{
-		key = KEYPAD_getPressedKey();	/* Reads Pressed Key */
-		if(g_newCalcFlag) clearAll();	/* If Its New Calculation Clears The Previous */
+		key = KEYPAD_getPressedKey(); /* Reads Pressed Key */
+		if (g_newCalcFlag)
+			clearAll(); /* If Its New Calculation Clears The Previous */
 		/* Checks The Pressed Key */
-		switch(key)
+		switch (key)
 		{
-			/* If Its "Enter", Clear Everything */
+		/* If Its "Enter", Clear Everything */
 		case 13:
 			clearAll();
 			break;
@@ -193,6 +190,6 @@ int main(void)
 			input(key);
 			break;
 		}
-		_delay_ms(200);					/* Delay Between Key Presses */
+		_delay_ms(200); /* Delay Between Key Presses */
 	}
 }
